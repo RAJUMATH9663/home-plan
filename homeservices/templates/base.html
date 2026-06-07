@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}HomeServices{% endblock %} | Integrated Home Services Platform</title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  {% block extra_css %}{% endblock %}
+</style>
+</head>
+<body>
+
+<!-- Floating Background Shapes -->
+<div class="float-shape shape1"></div>
+<div class="float-shape shape2"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="{% url 'home' %}" class="navbar-brand">🏠 HomeServices</a>
+  <ul class="nav-links">
+    <li><a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a></li>
+    <li><a href="{% url 'service_list' %}"><i class="fas fa-tools"></i> Services</a></li>
+    <li><a href="{% url 'civic_complaint' %}"><i class="fas fa-city"></i> Civic</a></li>
+    {% if user.is_authenticated %}
+      <li>
+        <a href="{% url 'dashboard' %}">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+          {% with unread=user.notifications.filter %}
+          {% endwith %}
+        </a>
+      </li>
+      <li><a href="{% url 'my_bookings' %}"><i class="fas fa-calendar-check"></i> My Bookings</a></li>
+      <li><a href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> {{ user.first_name|default:user.username }}</a></li>
+      <li><a href="{% url 'logout' %}" style="color:#ff5370;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    {% else %}
+      <li><a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+      <li><a href="{% url 'register' %}" class="btn btn-primary btn-sm">Register</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<!-- MESSAGES -->
+{% if messages %}
+<div style="position:fixed;top:80px;right:1.5rem;z-index:9999;min-width:300px;">
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }}" id="msg-{{ forloop.counter }}" style="animation:slideIn .4s ease;">
+    {% if msg.tags == 'success' %}<i class="fas fa-check-circle"></i>
+    {% elif msg.tags == 'error' %}<i class="fas fa-exclamation-circle"></i>
+    {% elif msg.tags == 'info' %}<i class="fas fa-info-circle"></i>
+    {% else %}<i class="fas fa-bell"></i>{% endif %}
+    {{ msg }}
+  </div>
+  {% endfor %}
+</div>
+<style>
+@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+</style>
+<script>
+setTimeout(()=>{document.querySelectorAll('[id^=msg-]').forEach(e=>e.remove())},4500);
+</script>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">🏠 HomeServices</div>
+  <p>An Integrated Platform for All Daily Home Services</p>
+  <p style="margin-top:.8rem;font-size:.75rem;">Built with Django + MySQL + Razorpay Test Mode &nbsp;|&nbsp; BCA Project 2024</p>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

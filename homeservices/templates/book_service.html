@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block title %}Book {{ service.name }}{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:780px;">
+
+  <!-- Service info card -->
+  <div class="glass-card mb-4 p-4" style="border-radius:16px;">
+    <div style="display:flex;align-items:center;gap:1.2rem;">
+      <div style="font-size:3rem;">🛠️</div>
+      <div>
+        <h2 style="margin:0;font-size:1.4rem;">{{ service.name }}</h2>
+        <p style="margin:.3rem 0 .5rem;color:var(--text-muted);">{{ service.description }}</p>
+        <span style="color:#43e97b;font-size:1.3rem;font-weight:700;">₹{{ service.price }}</span>
+        &nbsp;&nbsp;
+        <span style="color:var(--text-muted);font-size:.9rem;">🕐 {{ service.duration_hours }} hour(s)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking form -->
+  <div class="glass-card p-4" style="border-radius:16px;">
+    <h4 class="mb-4">📅 Booking Details</h4>
+
+    {% if messages %}
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}" style="margin-bottom:1rem;">
+        <i class="fas fa-exclamation-circle"></i> {{ msg }}
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <!-- Date -->
+      <div class="form-group mb-4">
+        <label class="form-label">📅 Select Date</label>
+        <input type="date" name="booking_date" id="bookingDate"
+               class="form-control"
+               value="{{ today }}"
+               min="{{ today }}"
+               required
+               onchange="updateSlots(this.value)">
+      </div>
+
+      <!-- Time Slots -->
+      <div class="form-group mb-4">
+        <label class="form-label">🕐 Available Time Slots (10 AM – 5 PM)</label>
+        <div id="slotGrid"
+             style="display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:.75rem;margin-top:.6rem;">
+          {% for slot in slots %}
+          <label id="lbl-{{ slot.value }}"
+                 style="
+                   display:flex;flex-direction:column;align-items:center;justify-content:center;
+                   padding:.7rem .4rem;border-radius:10px;text-align:center;
+                   font-size:.82rem;font-weight:600;
+                   cursor:{% if slot.disabled %}not-allowed{% else %}pointer{% endif %};
+                   border:2px solid {% if slot.disabled %}rgba(255,255,255,.08){% else %}rgba(99,102,241,.5){% endif %};
+                   background:{% if slot.disabled %}rgba(255,255,255,.03){% else %}rgba(99,102,241,.12){% endif %};
+                   opacity:{% if slot.disabled %}0.38{% else %}1{% endif %};
+                   pointer-events:{% if slot.disabled %}none{% else %}auto{% endif %};
+                   transition:all .2s;
+                 ">
+            <input type="radio" name="time_slot" value="{{ slot.value }}"
+                   style="display:none;"
+                   {% if slot.disabled %}disabled{% endif %}
+                   onchange="selectSlot(this)">
+            🕐 {{ slot.label }}
+            {% if slot.disabled %}
+              <small style="font-size:.68rem;font-weight:400;color:#ff5370;margin-top:2px;">Time passed</small>
+            {% endif %}
+          </label>
+          {% endfor %}
+        </div>
+        <div id="noSlots"
+             style="display:none;color:#ff5370;font-size:.85rem;margin-top:.6rem;padding:.5rem;
+                    border-left:3px solid #ff5370;background:rgba(255,83,112,.08);border-radius:4px;">
+          ⚠️ All slots for today have passed. Please select a future date.
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group mb-4">
+        <label class="form-label">📍 Service Address</label>
+        {{ form.address }}
+        {% if form.address.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.address.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Problem Description -->
+      <div class="form-group mb-4">
+        <label class="form-label">📝 Problem Description</label>
+        {{ form.problem_description }}
+        {% if form.problem_description.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.problem_description.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Upload Photo -->
+      <div class="form-group mb-4">
+        <label class="form-label">
+          📷 Upload Problem Photo
+          <small style="color:var(--text-muted);font-weight:400;">(optional)</small>
+        </label>
+        {{ form.problem_photo }}
+        {% if form.problem_photo.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.problem_photo.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">
+        <i class="fas fa-calendar-check"></i> Confirm Booking
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+// Passed from Django view
+const TODAY        = "{{ today }}";
+const CURRENT_HOUR = {{ current_hour }};
+
+// Map slot value → start hour
+const SLOT_HOURS = {
+  '10:00-11:00': 10,
+  '11:00-12:00': 11,
+  '12:00-13:00': 12,
+  '13:00-14:00': 13,
+  '14:00-15:00': 14,
+  '15:00-16:00': 15,
+  '16:00-17:00': 16,
+};
+
+function updateSlots(selectedDate) {
+  const isToday = (selectedDate === TODAY);
+  const labels  = document.querySelectorAll('#slotGrid label');
+  let allGone   = true;
+
+  labels.forEach(function(lbl) {
+    const radio     = lbl.querySelector('input[type=radio]');
+    const slotHour  = SLOT_HOURS[radio.value];
+    const isPast    = isToday && slotHour <= CURRENT_HOUR;
+    const smallTag  = lbl.querySelector('small');
+
+    if (isPast) {
+      lbl.style.opacity       = '0.38';
+      lbl.style.pointerEvents = 'none';
+      lbl.style.cursor        = 'not-allowed';
+      lbl.style.border        = '2px solid rgba(255,255,255,.08)';
+      lbl.style.background    = 'rgba(255,255,255,.03)';
+      radio.disabled          = true;
+      radio.checked           = false;
+      if (!smallTag) {
+        var s = document.createElement('small');
+        s.style.cssText = 'font-size:.68rem;font-weight:400;color:#ff5370;margin-top:2px;';
+        s.textContent   = 'Time passed';
+        lbl.appendChild(s);
+      }
+    } else {
+      lbl.style.opacity       = '1';
+      lbl.style.pointerEvents = 'auto';
+      lbl.style.cursor        = 'pointer';
+      lbl.style.border        = '2px solid rgba(99,102,241,.5)';
+      lbl.style.background    = 'rgba(99,102,241,.12)';
+      radio.disabled          = false;
+      if (smallTag) smallTag.remove();
+      allGone = false;
+    }
+  });
+
+  document.getElementById('noSlots').style.display =
+    (isToday && allGone) ? 'block' : 'none';
+}
+
+function selectSlot(radio) {
+  // Clear all highlights first
+  document.querySelectorAll('#slotGrid label').forEach(function(l) {
+    if (!l.querySelector('input').disabled) {
+      l.style.background = 'rgba(99,102,241,.12)';
+      l.style.border     = '2px solid rgba(99,102,241,.5)';
+      l.style.color      = '';
+    }
+  });
+  // Highlight chosen
+  var parent = radio.closest('label');
+  parent.style.background = 'rgba(99,102,241,.7)';
+  parent.style.border     = '2px solid #6366F1';
+  parent.style.color      = 'white';
+}
+
+// Run immediately on page load
+updateSlots(document.getElementById('bookingDate').value);
+</script>
+{% endblock %}

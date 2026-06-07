@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block title %}Payment – ₹{{ amount_display }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% if is_dev_mode %}
+  <div class="alert alert-info mb-3">
+    <strong>⚙️ DEV MODE</strong> — Payments will be simulated. No real charges will be made.
+  </div>
+  {% endif %}
+  
+  <div style="max-width:600px;margin:0 auto;">
+
+    <!-- ORDER SUMMARY -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="fas fa-receipt"></i> Order Summary</div>
+      <table class="invoice-table" style="margin:0;">
+        <tr><td class="text-muted">Service</td><td><strong>{{ booking.service.name }}</strong></td></tr>
+        <tr><td class="text-muted">Date</td><td>{{ booking.booking_date }}</td></tr>
+        <tr><td class="text-muted">Time Slot</td><td>{{ booking.time_slot }}</td></tr>
+        <tr><td class="text-muted">Address</td><td>{{ booking.address|truncatewords:10 }}</td></tr>
+        <tr><td class="text-muted">Booking ID</td><td>#{{ booking.id }}</td></tr>
+      </table>
+
+      <div class="invoice-total mt-3">
+        <span>Total Amount</span>
+        <span class="text-success">₹{{ amount_display }}</span>
+      </div>
+    </div>
+
+    <!-- PAYMENT CARD -->
+    <div class="card text-center">
+      <div style="font-size:3rem;margin-bottom:1rem;">💳</div>
+      <h3>Secure Payment</h3>
+      <p class="text-muted fs-sm mb-3">Powered by Razorpay</p>
+
+      {% if payment_init_error %}
+        <div class="alert alert-danger" role="alert">
+          <h5 class="mb-2">
+            <i class="fas fa-exclamation-triangle"></i> Payment Gateway Error
+          </h5>
+          <p class="mb-2">{{ payment_init_error }}</p>
+          <small class="text-muted">Your booking is saved. Please try again or contact support.</small>
+        </div>
+        <div style="margin-top:1.5rem;">
+          <a href="{% url 'my_bookings' %}" class="btn btn-secondary me-2">
+            <i class="fas fa-arrow-left"></i> Back to Bookings
+          </a>
+          <button class="btn btn-primary" onclick="demoPayment()">
+            <i class="fas fa-play"></i> Demo Payment
+          </button>
+        </div>
+      {% else %}
+        <button class="btn btn-primary btn-lg btn-block" onclick="demoPayment()">
+          <i class="fas fa-play"></i> Demo Payment (Test Mode)
+        </button>
+        
+        <div style="margin-top:1rem;">
+          <button id="payBtn" class="btn btn-outline-secondary btn-sm" onclick="initiatePayment()">
+            <i class="fas fa-lock"></i> Try Real Razorpay Payment
+          </button>
+        </div>
+      {% endif %}
+
+      <div style="margin-top:1rem;font-size:.75rem;color:var(--text-muted);">
+        <i class="fas fa-shield-alt"></i> 256-bit SSL Encrypted &nbsp;|&nbsp; Razorpay Secured
+      </div>
+    </div>
+
+    <!-- HIDDEN FORM -->
+    <form id="paymentForm" action="{% url 'payment_success' %}" method="POST" style="display:none;">
+      {% csrf_token %}
+      <input type="hidden" name="razorpay_order_id" id="rzp_order_id">
+      <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id">
+      <input type="hidden" name="razorpay_signature" id="rzp_signature">
+      <input type="hidden" name="booking_id" value="{{ booking.id }}">
+    </form>
+
+  </div>
+</div>
+
+<!-- RAZORPAY SCRIPT -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+function demoPayment() {
+  console.log('[DEMO MODE] Simulating instant payment...');
+  
+  if (!confirm('Complete payment in DEMO MODE?\n\nNo real charges will be made.')) {
+    return;
+  }
+  
+  document.getElementById('rzp_order_id').value = 'demo_order_{{ booking.id }}';
+  document.getElementById('rzp_payment_id').value = 'demo_payment_' + Date.now();
+  document.getElementById('rzp_signature').value = 'demo_signature_' + Date.now();
+  
+  var payBtn = document.getElementById('payBtn');
+  if (payBtn) {
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Demo Payment...';
+    payBtn.disabled = true;
+  }
+  
+  setTimeout(function() {
+    alert('✓ Demo payment completed!\n\nBooking #{{ booking.id }} marked as paid.');
+    document.getElementById('paymentForm').submit();
+  }, 1500);
+}
+
+function initiatePayment() {
+  // Dev mode: skip Razorpay checkout and go directly to success
+  {% if is_dev_mode %}
+  demoPayment();
+  return;
+  {% endif %}
+  
+  var options = {
+    key: '{{ razorpay_key_id }}',
+    amount: {{ amount }},
+    currency: 'INR',
+    name: 'HomeServices',
+    description: '{{ booking.service.name }}',
+    order_id: '{{ razorpay_order_id }}',
+
+    prefill: {
+      name: '{{ request.user.get_full_name }}',
+      email: '{{ request.user.email }}',
+      contact: '{% if prefill_phone %}{{ prefill_phone }}{% else %}{% endif %}'
+    },
+
+    notes: {
+      booking_id: '{{ booking.id }}'
+    },
+
+    theme: {
+      color: '#6c63ff'
+    },
+
+    handler: function (response) {
+      document.getElementById('rzp_order_id').value = response.razorpay_order_id;
+      document.getElementById('rzp_payment_id').value = response.razorpay_payment_id;
+      document.getElementById('rzp_signature').value = response.razorpay_signature;
+      document.getElementById('paymentForm').submit();
+    },
+
+    modal: {
+      ondismiss: function () {
+        var payBtn = document.getElementById('payBtn');
+        if (payBtn) {
+          payBtn.innerHTML =
+            '<i class="fas fa-lock"></i> Pay ₹{{ amount_display }} Securely';
+          payBtn.disabled = false;
+        }
+      }
+    }
+  };
+
+  var rzp = new Razorpay(options);
+
+  rzp.on('payment.failed', function (resp) {
+    var errorMsg = resp.error.description || 'Payment failed. Please try again.';
+    var payBtn = document.getElementById('payBtn');
+    if (payBtn) {
+      payBtn.innerHTML =
+        '<i class="fas fa-lock"></i> Pay ₹{{ amount_display }} Securely';
+      payBtn.disabled = false;
+    }
+    
+    // Better error messaging
+    if (errorMsg.toLowerCase().includes('international')) {
+      errorMsg = 'International cards not supported. Please use an Indian card or contact support.';
+    }
+    
+    // Log error to server
+    fetch('{% url "payment_error" %}', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        error_code: resp.error.code,
+        error_desc: errorMsg,
+        booking_id: '{{ booking.id }}'
+      })
+    }).catch(err => console.error('Error logging failed:', err));
+    
+    alert('Payment failed:\n\n' + errorMsg + '\n\nPlease try Demo Payment or contact support.');
+  });
+
+  var payBtn = document.getElementById('payBtn');
+  if (payBtn) {
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening Payment...';
+    payBtn.disabled = true;
+  }
+
+  rzp.open();
+}
+</script>
+
+{% endblock %}

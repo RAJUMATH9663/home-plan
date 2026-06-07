@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}All Services{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="section-title">
+    <h2><i class="fas fa-tools"></i> All Home Services</h2>
+    <p>Choose from our wide range of professional services</p>
+  </div>
+
+  {% for cat in categories %}
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:.7rem;">
+      <span style="font-size:1.5rem;">{{ cat.icon }}</span>
+      {{ cat.name }}
+      <span style="font-size:.75rem;color:var(--text-muted);font-weight:400;">({{ cat.services.count }} services)</span>
+    </h3>
+    <div class="services-grid">
+      {% for svc in cat.services.all %}
+      {% if svc.is_active %}
+      <div class="service-card">
+        <div class="service-card-img">{{ cat.icon }}</div>
+        <div class="service-card-body">
+          <div class="service-card-title">{{ svc.name }}</div>
+          <div class="service-card-price">₹{{ svc.price }}</div>
+          <div class="service-card-desc">{{ svc.description|truncatewords:15 }}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.8rem;">
+            <i class="fas fa-clock"></i> {{ svc.duration_hours }} hour(s)
+          </div>
+          {% if user.is_authenticated %}
+          <a href="{% url 'book_service' svc.id %}" class="btn btn-primary btn-sm btn-block">
+            <i class="fas fa-calendar-plus"></i> Book Now
+          </a>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn btn-secondary btn-sm btn-block">
+            <i class="fas fa-sign-in-alt"></i> Login to Book
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+      {% empty %}
+      <p class="text-muted">No services in this category yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center" style="padding:4rem;">
+    <div style="font-size:4rem;margin-bottom:1rem;">🔧</div>
+    <h3>Services coming soon</h3>
+    <p class="text-muted">Admin is adding services. Check back shortly.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

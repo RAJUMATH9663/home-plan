@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Verify OTP{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">📧</div>
+      <h2>Email Verification</h2>
+      <p>OTP sent to <strong>{{ email }}</strong></p>
+    </div>
+
+    {% if otp_preview and not otp_preview.delivered %}
+    <div class="alert alert-warning" style="margin-bottom:1rem;">
+      <i class="fas fa-exclamation-triangle"></i>
+      Email delivery is unavailable right now. Use this OTP to continue:
+      <strong style="font-size:1.05rem;letter-spacing:.12em;">{{ otp_preview.otp }}</strong>
+    </div>
+    {% endif %}
+
+    {% if form.errors %}
+    <div class="alert alert-error"><i class="fas fa-times-circle"></i> Invalid OTP. Please try again.</div>
+    {% endif %}
+
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i>
+      Enter the 6-digit OTP sent to your email. Valid for <strong id="countdown">10:00</strong>
+    </div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Enter OTP</label>
+        <input type="text" name="otp" class="form-control otp-input"
+               placeholder="Enter 6-digit OTP" maxlength="6"
+               inputmode="numeric" autocomplete="off" required autofocus>
+        {% if form.otp.errors %}
+          <div style="color:#ff5370;font-size:.76rem;margin-top:4px;">
+            ✗ {{ form.otp.errors.0 }}
+          </div>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">
+        <i class="fas fa-check-circle"></i> Verify OTP
+      </button>
+    </form>
+
+    <div class="text-center mt-3" style="font-size:.85rem;color:var(--text-muted);">
+      Didn't receive?
+      <a href="{% url 'resend_otp' %}" class="text-primary" style="text-decoration:none;font-weight:600;">
+        <i class="fas fa-redo"></i> Resend OTP
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Countdown timer
+let t = 600;
+const el = document.getElementById('countdown');
+const timer = setInterval(()=>{
+  t--;
+  const m = Math.floor(t/60), s = t%60;
+  el.textContent = `${m}:${s<10?'0':''}${s}`;
+  if(t<=0){ clearInterval(timer); el.textContent='Expired'; el.style.color='#ff5370'; }
+},1000);
+</script>
+{% endblock %}

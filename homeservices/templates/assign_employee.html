@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}Assign Employee{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:860px;">
+
+  <h3 class="mb-4">
+    <i class="fas fa-user-check"></i> Assign Employee
+  </h3>
+
+  <!-- Booking Summary -->
+  <div class="glass-card p-4 mb-4" style="border-radius:14px;border-left:4px solid #4F46E5;">
+    <h5 style="color:#a78bfa;margin-bottom:.8rem;">📋 Booking Details</h5>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem .5rem;font-size:.9rem;">
+      <div><span style="color:var(--text-muted);">Booking ID:</span> <strong>#{{ booking.id }}</strong></div>
+      <div><span style="color:var(--text-muted);">Service:</span> <strong>{{ booking.service.name }}</strong></div>
+      <div><span style="color:var(--text-muted);">Customer:</span> <strong>{{ booking.user.get_full_name|default:booking.user.username }}</strong></div>
+      <div><span style="color:var(--text-muted);">Amount:</span> <strong style="color:#43e97b;">₹{{ booking.total_amount }}</strong></div>
+      <div><span style="color:var(--text-muted);">Date:</span> <strong>{{ booking.booking_date }}</strong></div>
+      <div><span style="color:var(--text-muted);">Slot:</span> <strong>{{ booking.time_slot }}</strong></div>
+      <div style="grid-column:1/-1;"><span style="color:var(--text-muted);">Address:</span> <strong>{{ booking.address }}</strong></div>
+      {% if booking.problem_description %}
+      <div style="grid-column:1/-1;"><span style="color:var(--text-muted);">Problem:</span> {{ booking.problem_description }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- EXPERT EMPLOYEES (have this service skill) -->
+    {% if expert_employees %}
+    <div class="glass-card p-4 mb-4" style="border-radius:14px;">
+      <h5 style="color:#43e97b;margin-bottom:1rem;">
+        ⭐ Expert Employees
+        <small style="font-size:.75rem;font-weight:400;color:var(--text-muted);">
+          — specialists in {{ booking.service.name }}
+        </small>
+      </h5>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;">
+        {% for emp in expert_employees %}
+        <label style="
+          display:block;padding:1rem;border-radius:10px;cursor:pointer;
+          border:2px solid rgba(67,233,122,.3);background:rgba(67,233,122,.06);
+          transition:all .2s;
+        "
+        onmouseover="this.style.border='2px solid #43e97b';this.style.background='rgba(67,233,122,.12)'"
+        onmouseout="if(!this.querySelector('input').checked){this.style.border='2px solid rgba(67,233,122,.3)';this.style.background='rgba(67,233,122,.06)'}"
+        onclick="selectCard(this)">
+          <input type="radio" name="employee_id" value="{{ emp.id }}"
+                 style="display:none;" required
+                 onchange="selectCard(this.closest('label'))">
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <div style="width:42px;height:42px;border-radius:50%;background:#43e97b22;
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:1.2rem;">👷</div>
+            <div>
+              <div style="font-weight:600;font-size:.95rem;">
+                {{ emp.user.get_full_name|default:emp.user.username }}
+              </div>
+              <div style="font-size:.78rem;color:var(--text-muted);">
+                📞 {{ emp.phone }}
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;font-size:.75rem;">
+            <span style="background:rgba(67,233,122,.15);color:#43e97b;padding:2px 8px;border-radius:20px;">
+              ⭐ {{ emp.rating|floatformat:1 }} rating
+            </span>
+            <span style="background:rgba(99,102,241,.15);color:#a78bfa;padding:2px 8px;border-radius:20px;">
+              ✅ {{ emp.total_jobs }} jobs done
+            </span>
+            <span style="background:rgba(67,233,122,.15);color:#43e97b;padding:2px 8px;border-radius:20px;">
+              🟢 Available
+            </span>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- OTHER EMPLOYEES (available but not specialists) -->
+    {% if other_employees %}
+    <div class="glass-card p-4 mb-4" style="border-radius:14px;">
+      <h5 style="color:#f6d365;margin-bottom:1rem;">
+        👤 Other Available Employees
+        <small style="font-size:.75rem;font-weight:400;color:var(--text-muted);">
+          — available but not specialists
+        </small>
+      </h5>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;">
+        {% for emp in other_employees %}
+        <label style="
+          display:block;padding:1rem;border-radius:10px;cursor:pointer;
+          border:2px solid rgba(246,211,101,.25);background:rgba(246,211,101,.04);
+          transition:all .2s;
+        "
+        onmouseover="this.style.border='2px solid #f6d365';this.style.background='rgba(246,211,101,.1)'"
+        onmouseout="if(!this.querySelector('input').checked){this.style.border='2px solid rgba(246,211,101,.25)';this.style.background='rgba(246,211,101,.04)'}"
+        onclick="selectCard(this)">
+          <input type="radio" name="employee_id" value="{{ emp.id }}"
+                 style="display:none;"
+                 onchange="selectCard(this.closest('label'))">
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <div style="width:42px;height:42px;border-radius:50%;background:#f6d36522;
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:1.2rem;">👤</div>
+            <div>
+              <div style="font-weight:600;font-size:.95rem;">
+                {{ emp.user.get_full_name|default:emp.user.username }}
+              </div>
+              <div style="font-size:.78rem;color:var(--text-muted);">
+                📞 {{ emp.phone }}
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;font-size:.75rem;">
+            <span style="background:rgba(246,211,101,.15);color:#f6d365;padding:2px 8px;border-radius:20px;">
+              ⭐ {{ emp.rating|floatformat:1 }} rating
+            </span>
+            <span style="background:rgba(99,102,241,.15);color:#a78bfa;padding:2px 8px;border-radius:20px;">
+              ✅ {{ emp.total_jobs }} jobs done
+            </span>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if not expert_employees and not other_employees %}
+    <div class="alert alert-error mb-4">
+      <i class="fas fa-exclamation-triangle"></i>
+      No available employees right now. Please make an employee available first.
+    </div>
+    {% endif %}
+
+    <!-- Selected employee name preview -->
+    <div id="selectedPreview"
+         style="display:none;padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;
+                background:rgba(99,102,241,.15);border-left:3px solid #6366F1;font-size:.9rem;">
+      ✅ Selected: <strong id="selectedName"></strong>
+    </div>
+
+    <div style="display:flex;gap:1rem;">
+      <button type="submit" class="btn btn-primary btn-lg"
+              {% if not expert_employees and not other_employees %}disabled{% endif %}>
+        <i class="fas fa-user-check"></i> Assign This Employee
+      </button>
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-lg">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+function selectCard(label) {
+  // Clear all cards
+  document.querySelectorAll('label[onmouseover]').forEach(function(l) {
+    var input = l.querySelector('input');
+    if (input && !input.checked) {
+      l.style.border     = l.getAttribute('onmouseout').includes('43e97b')
+                           ? '2px solid rgba(67,233,122,.3)'
+                           : '2px solid rgba(246,211,101,.25)';
+      l.style.background = l.getAttribute('onmouseout').includes('43e97b')
+                           ? 'rgba(67,233,122,.06)'
+                           : 'rgba(246,211,101,.04)';
+    }
+  });
+  // Highlight selected
+  label.style.border     = '2px solid #6366F1';
+  label.style.background = 'rgba(99,102,241,.2)';
+  // Show preview
+  var name = label.querySelector('div[style*="font-weight:600"]').textContent.trim();
+  document.getElementById('selectedName').textContent = name;
+  document.getElementById('selectedPreview').style.display = 'block';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Submit Civic Complaint{% endblock %}
+{% block content %}
+<div class="container section">
+  <div style="max-width:640px;margin:0 auto;">
+
+    <div class="section-title">
+      <h2><i class="fas fa-city"></i> Submit Civic Complaint</h2>
+      <p>Report municipal issues in your area</p>
+    </div>
+
+    <!-- Complaint Type Visual Selector -->
+    <div class="civic-grid" style="margin-bottom:1.5rem;" id="typeGrid">
+      <div class="civic-type" onclick="selectType('gas',this)"><div class="icon">⛽</div><div class="label">Gas Booking</div></div>
+      <div class="civic-type" onclick="selectType('water',this)"><div class="icon">💧</div><div class="label">Water Tanker</div></div>
+      <div class="civic-type" onclick="selectType('garbage',this)"><div class="icon">🗑️</div><div class="label">Garbage</div></div>
+      <div class="civic-type" onclick="selectType('streetlight',this)"><div class="icon">💡</div><div class="label">Streetlight</div></div>
+      <div class="civic-type" onclick="selectType('electricity',this)"><div class="icon">⚡</div><div class="label">Electricity</div></div>
+      <div class="civic-type" onclick="selectType('other',this)"><div class="icon">📋</div><div class="label">Other</div></div>
+    </div>
+
+    <div class="card">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group" style="display:none;">
+          <select name="complaint_type" id="complaintTypeField" class="form-control">
+            <option value="gas">Gas Booking</option>
+            <option value="water">Water Tanker Request</option>
+            <option value="garbage">Garbage Complaint</option>
+            <option value="streetlight">Streetlight Complaint</option>
+            <option value="electricity">Electricity Complaint</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div id="typeLabel" class="alert alert-info mb-2" style="display:none;">
+          <i class="fas fa-check-circle"></i> Selected: <strong id="typeLabelText"></strong>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
+          <textarea name="description" class="form-control" rows="4" placeholder="Describe the issue in detail..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-map-marker-alt"></i> Location / Address</label>
+          <textarea name="address" class="form-control" rows="2" placeholder="Street, Area, Landmark..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-camera"></i> Photo Evidence <span class="text-muted fs-sm">(optional)</span></label>
+          <input type="file" name="photo" class="form-control" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <i class="fas fa-paper-plane"></i> Submit Complaint
+        </button>
+      </form>
+    </div>
+
+    <div class="text-center mt-3">
+      <a href="{% url 'my_complaints' %}" class="btn btn-secondary">
+        <i class="fas fa-list"></i> View My Complaints
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const labels = {gas:'Gas Booking',water:'Water Tanker Request',garbage:'Garbage Complaint',streetlight:'Streetlight Complaint',electricity:'Electricity Complaint',other:'Other'};
+function selectType(val, el) {
+  document.querySelectorAll('.civic-type').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('complaintTypeField').value = val;
+  document.getElementById('typeLabel').style.display = 'flex';
+  document.getElementById('typeLabelText').textContent = labels[val];
+}
+// Select first by default
+document.querySelectorAll('.civic-type')[0].click();
+</script>
+{% endblock %}

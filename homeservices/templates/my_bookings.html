@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings{% endblock %}
+{% block content %}
+<style>
+  .bookings-wrap {
+    max-width: 980px;
+  }
+  .bookings-title {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin-bottom: 1.25rem;
+  }
+  .booking-card {
+    border-radius: 18px;
+    padding: 1.1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
+  }
+  .booking-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .booking-service {
+    margin: 0;
+    font-size: 1.06rem;
+    font-weight: 700;
+  }
+  .booking-meta {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    display: block;
+    margin-top: 0.15rem;
+  }
+  .booking-right {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+  .booking-amount {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #43e97b;
+  }
+  .status-pill {
+    padding: 0.24rem 0.78rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .status-completed { background: #43e97b22; color: #43e97b; }
+  .status-in-progress { background: #4dd0e122; color: #4dd0e1; }
+  .status-confirmed { background: #a78bfa22; color: #a78bfa; }
+  .status-pending { background: #ff537022; color: #ff5370; }
+
+  .booking-divider {
+    border-color: rgba(255,255,255,0.08);
+    margin: 0.85rem 0;
+  }
+  .booking-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.6rem;
+  }
+  .info-tile {
+    border-radius: 10px;
+    padding: 0.65rem 0.7rem;
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.08);
+    min-height: 68px;
+  }
+  .info-label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    margin-bottom: 0.18rem;
+  }
+  .info-value {
+    font-size: 0.86rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .employee-box {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 12px;
+    padding: 0.7rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .employee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .employee-left {
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+  }
+  .employee-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: rgba(99,102,241,.22);
+  }
+  .employee-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #43e97b;
+  }
+  .employee-sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.7rem;
+    margin-top: 0.65rem;
+    margin-bottom: 0.8rem;
+  }
+  .photo-title {
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-muted);
+  }
+  .photo-title.after { color: #43e97b; }
+  .photo-title.verify { color: #a78bfa; }
+  .photo-box img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .verified-note {
+    margin-top: 0.2rem;
+    color: #43e97b;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .actions-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .btn-verify {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: #fff;
+    border: none;
+  }
+  .btn-rate {
+    background: linear-gradient(135deg, #f6d365, #f093fb);
+    color: #1a1a2e;
+    border: none;
+    font-weight: 700;
+  }
+  .rating-pill {
+    background: #43e97b22;
+    color: #43e97b;
+    border-radius: 8px;
+    padding: 0.36rem 0.82rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 576px) {
+    .booking-card {
+      padding: 0.9rem;
+    }
+    .booking-amount {
+      font-size: 1rem;
+    }
+    .btn-sm {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="container py-4 bookings-wrap">
+  <h3 class="bookings-title"><i class="fas fa-calendar-check"></i> My Bookings</h3>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {% if not bookings %}
+  <div class="glass-card p-5 text-center">
+    <div style="font-size:3rem;">📋</div>
+    <h5 class="mt-3">No bookings yet</h5>
+    <a href="{% url 'service_list' %}" class="btn btn-primary mt-3">Book a Service</a>
+  </div>
+  {% endif %}
+
+  {% for booking in bookings %}
+  <div class="glass-card booking-card">
+
+    <!-- Header -->
+    <div class="booking-top">
+      <div>
+        <h5 class="booking-service">{{ booking.service.name }}</h5>
+        <small class="booking-meta">
+          {{ booking.service.category.name }} | Booking #{{ booking.id }}
+        </small>
+      </div>
+      <div class="booking-right">
+        <span class="booking-amount">₹{{ booking.total_amount }}</span>
+        {% if booking.status == 'completed' %}
+          <span class="status-pill status-completed">Completed</span>
+        {% elif booking.status == 'in_progress' %}
+          <span class="status-pill status-in-progress">In Progress</span>
+        {% elif booking.status == 'confirmed' %}
+          <span class="status-pill status-confirmed">Confirmed</span>
+        {% else %}
+          <span class="status-pill status-pending">Pending</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="booking-divider">
+
+    <!-- Info row -->
+    <div class="booking-info-grid">
+      <div class="info-tile">
+        <div class="info-label">Date</div>
+        <div class="info-value">{{ booking.booking_date }}</div>
+      </div>
+      <div class="info-tile">
+        <div class="info-label">Time Slot</div>
+        <div class="info-value">{{ booking.time_slot }}</div>
+      </div>
+      <div class="info-tile">
+        <div class="info-label">Payment</div>
+        <div class="info-value">
+          {% if booking.payment and booking.payment.status == 'paid' %}
+            <span style="color:#43e97b;">Paid</span>
+            {% if booking.payment.is_test_mode %}
+              <span style="background:#f6d36522;color:#f6d365;padding:1px 7px;border-radius:10px;font-size:.72rem;margin-left:4px;">Test</span>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'payment' booking.id %}" class="btn btn-primary btn-sm">Pay Now</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="info-tile">
+        <div class="info-label">Address</div>
+        <div class="info-value">{{ booking.address|truncatechars:34 }}</div>
+      </div>
+    </div>
+
+    <!-- Employee section -->
+    {% if booking.employee %}
+    <div class="employee-box">
+      <div class="info-label" style="margin-bottom:.4rem;">Assigned Employee</div>
+      <div class="employee-row">
+        <div class="employee-left">
+          <div class="employee-avatar">👷</div>
+          <div>
+            <div class="employee-name">
+              {{ booking.employee.user.get_full_name|default:booking.employee.user.username }}
+            </div>
+            <div class="employee-sub">
+              📞 {{ booking.employee.phone }}
+            </div>
+            <div class="employee-sub">
+              ★ {{ booking.employee.rating }} | {{ booking.employee.total_jobs }} jobs completed
+            </div>
+          </div>
+        </div>
+        {% if booking.status == 'completed' %}
+          <span class="status-pill status-completed">
+            ✅ Job Completed
+          </span>
+        {% elif booking.status == 'in_progress' %}
+          <span class="status-pill status-in-progress">
+            🔧 Currently Working
+          </span>
+        {% else %}
+          <span class="status-pill" style="background:#f6d36522;color:#f6d365;">
+            ⏳ Waiting to Start
+          </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- PHOTOS SECTION -->
+    {% if booking.problem_photo or booking.completion_photo or booking.user_verification_photo %}
+    <div class="photos-grid">
+
+      {% if booking.problem_photo %}
+      <div class="photo-box">
+        <div class="photo-title">📷 Before (Your photo)</div>
+        <img src="{{ booking.problem_photo.url }}"
+             alt="Before photo">
+      </div>
+      {% endif %}
+
+      {% if booking.completion_photo %}
+      <div class="photo-box">
+        <div class="photo-title after">✅ After (Employee photo)</div>
+        <img src="{{ booking.completion_photo.url }}"
+             alt="Completion photo">
+      </div>
+      {% endif %}
+
+      {% if booking.user_verification_photo %}
+      <div class="photo-box">
+        <div class="photo-title verify">🔍 Your Verification Photo</div>
+        <img src="{{ booking.user_verification_photo.url }}"
+             alt="Verification photo">
+        <div class="verified-note">✓ Work verified by you</div>
+      </div>
+      {% endif %}
+
+    </div>
+    {% endif %}
+
+    <!-- ACTION BUTTONS -->
+    <div class="actions-row">
+
+      {% if booking.payment and booking.payment.status == 'paid' %}
+        <a href="{% url 'invoice' booking.id %}" class="btn btn-primary btn-sm">
+          <i class="fas fa-file-invoice"></i> Invoice
+        </a>
+      {% endif %}
+
+      <!-- VERIFY WORK button: shows when employee completed but user hasn't verified yet -->
+      {% if booking.status == 'completed' and booking.completion_photo and not booking.user_verified %}
+        <a href="{% url 'user_verify_work' booking.id %}"
+           class="btn btn-sm btn-verify">
+          <i class="fas fa-camera"></i> Upload Proof &amp; Verify
+        </a>
+      {% endif %}
+
+      <!-- RATE button: shows only after user verified -->
+      {% if booking.status == 'completed' and booking.user_verified %}
+        {% if not booking.review %}
+          <a href="{% url 'rate_employee' booking.id %}"
+             class="btn btn-sm btn-rate">
+            <i class="fas fa-star"></i> Rate Service
+          </a>
+        {% else %}
+          <span class="rating-pill">
+            ★ You rated: {{ booking.review.rating }}/5
+          </span>
+        {% endif %}
+      {% endif %}
+
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

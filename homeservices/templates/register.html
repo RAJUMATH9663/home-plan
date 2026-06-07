@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">🏠</div>
+      <h2>Create Account</h2>
+      <p>Join thousands of happy customers</p>
+    </div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" id="first_name" name="first_name" class="form-control"
+                 placeholder="First Name (letters only)"
+                 pattern="[a-zA-Z]+" title="First name must contain letters only"
+                 required
+                 value="{{ post.first_name }}">
+          {% if errors.first_name %}
+            <div style="color:#ff5370;font-size:.76rem;margin-top:4px;">
+              ✗ {{ errors.first_name }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="last_name" class="form-control"
+                 placeholder="Last Name (letters only)"
+                 pattern="[a-zA-Z]+" title="Last name must contain letters only"                 required                 value="{{ post.last_name }}">
+          {% if errors.last_name %}
+            <div style="color:#ff5370;font-size:.76rem;margin-top:4px;">
+              ✗ {{ errors.last_name }}
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-envelope"></i> Email Address</label>
+        <input type="email" name="email" class="form-control"
+               placeholder="Email Address"
+               value="{{ post.email }}">
+        {% if errors.email %}
+          <div style="color:#ff5370;font-size:.76rem;margin-top:4px;">
+            ✗ {{ errors.email }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-phone"></i> Phone Number</label>
+        <input type="text" id="phone" name="phone" class="form-control"
+               placeholder="10 digits — starts with 6/7/8/9"
+               maxlength="10" inputmode="numeric"
+               value="{{ post.phone }}">
+        {% if errors.phone %}
+          <div style="color:#ff5370;font-size:.76rem;margin-top:4px;">
+            ✗ {{ errors.phone }}
+          </div>
+        {% else %}
+          <div style="color:var(--text-muted);font-size:.74rem;margin-top:3px;">
+            10 digits — must start with 6, 7, 8, or 9
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-lock"></i> Password</label>
+        <input type="password" name="password" id="pwdField" class="form-control"
+               placeholder="Min 8 | A-Z | a-z | 0-9 | special (!@#$)">
+        {% if errors.password %}
+          <div style="color:#ff5370;font-size:.76rem;margin-top:4px;">
+            ✗ {{ errors.password }}
+          </div>
+        {% else %}
+          <div style="color:var(--text-muted);font-size:.74rem;margin-top:3px;">
+            Min 8 chars | 1 uppercase | 1 lowercase | 1 number | 1 special (!@#$)
+          </div>
+        {% endif %}
+        <div style="height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:6px;overflow:hidden;">
+          <div id="sBar" style="height:100%;width:0%;transition:width .3s,background .3s;border-radius:2px;"></div>
+        </div>
+        <div id="sTxt" style="font-size:.72rem;margin-top:2px;"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-lock"></i> Confirm Password</label>
+        <input type="password" name="confirm_pass" id="confField" class="form-control"
+               placeholder="Confirm Password">
+        {% if errors.confirm_pass %}
+          <div style="color:#ff5370;font-size:.76rem;margin-top:4px;">
+            ✗ {{ errors.confirm_pass }}
+          </div>
+        {% endif %}
+        <div id="mMsg" style="font-size:.72rem;margin-top:3px;"></div>
+      </div>
+
+      <div class="alert alert-info" style="font-size:.8rem;">
+        <i class="fas fa-info-circle"></i>
+        An OTP will be sent to your email to verify your account.
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">
+        <i class="fas fa-user-plus"></i> Register &amp; Get OTP
+      </button>
+    </form>
+
+    <div class="divider"><span>Already have an account?</span></div>
+    <a href="{% url 'login' %}" class="btn btn-secondary btn-block">
+      <i class="fas fa-sign-in-alt"></i> Login
+    </a>
+  </div>
+</div>
+
+<script>
+const p1 = document.getElementById('pwdField');
+const p2 = document.getElementById('confField');
+const sb = document.getElementById('sBar');
+const st = document.getElementById('sTxt');
+const mm = document.getElementById('mMsg');
+
+function sc(p) {
+  let s = 0;
+  if (p.length >= 8) s++;
+  if (/[A-Z]/.test(p)) s++;
+  if (/[a-z]/.test(p)) s++;
+  if (/[0-9]/.test(p)) s++;
+  if (/[!@#$%^&*()\-_=+\[\]{};:'",.<?]/.test(p)) s++;
+  return s;
+}
+
+p1.addEventListener('input', function () {
+  const s = sc(this.value);
+  const c = ['','#ff5370','#ff8800','#f6d365','#43e97b','#43e97b'];
+  const l = ['','Very Weak','Weak','Fair','Strong','Very Strong'];
+  sb.style.width = (s / 5 * 100) + '%';
+  sb.style.background = c[s];
+  st.textContent = this.value ? l[s] : '';
+  st.style.color = c[s];
+});
+
+p2.addEventListener('input', function () {
+  if (!this.value) { mm.textContent = ''; return; }
+  if (this.value === p1.value) {
+    mm.textContent = '✓ Passwords match';
+    mm.style.color = '#43e97b';
+  } else {
+    mm.textContent = '✗ Passwords do not match';
+    mm.style.color = '#ff5370';
+  }
+});
+
+// Prevent numbers and special characters in first name and last name
+const firstName = document.getElementById('first_name');
+const lastName = document.getElementById('last_name');
+
+function allowOnlyLetters(e) {
+  const char = String.fromCharCode(e.which);
+  if (!/[a-zA-Z]/.test(char)) {
+    e.preventDefault();
+  }
+}
+
+if (firstName) {
+  firstName.addEventListener('keypress', allowOnlyLetters);
+  firstName.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    const filtered = pastedText.replace(/[^a-zA-Z]/g, '');
+    this.value = filtered;
+  });
+}
+
+if (lastName) {
+  lastName.addEventListener('keypress', allowOnlyLetters);
+  lastName.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    const filtered = pastedText.replace(/[^a-zA-Z]/g, '');
+    this.value = filtered;
+  });
+}
+
+// Phone number validation - only allow 6, 7, 8, 9 as first digit (reject 1-5)
+const phone = document.getElementById('phone');
+if (phone) {
+  phone.addEventListener('input', function() {
+    let value = this.value.replace(/[^0-9]/g, '');
+    if (value.length > 0 && /^[1-5]/.test(value)) {
+      value = value.substring(1);
+    }
+    this.value = value;
+  });
+  
+  phone.addEventListener('keypress', function(e) {
+    const char = String.fromCharCode(e.which);
+    if (this.value.length === 0 && /[1-5]/.test(char)) {
+      e.preventDefault();
+    }
+    if (!/[0-9]/.test(char)) {
+      e.preventDefault();
+    }
+  });
+  
+  phone.addEventListener('paste', function(e) {
+    e.preventDefault();
+    let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    pastedText = pastedText.replace(/[^0-9]/g, '');
+    if (pastedText.length > 0 && /^[1-5]/.test(pastedText)) {
+      pastedText = pastedText.substring(1);
+    }
+    this.value = pastedText.substring(0, 10);
+  });
+}
+</script>
+{% endblock %}
