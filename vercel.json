@@ -1,14 +1,14 @@
 {
   "builds": [
     {
-      "src": "homeservices/wsgi.py",
+      "src": "homeservices/homeservices/wsgi.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "homeservices/wsgi.py"
+      "dest": "homeservices/homeservices/wsgi.py"
     }
   ],
   "env": {
