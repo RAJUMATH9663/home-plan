@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🛠️</div>
+      <div style="font-weight:700;">Admin Panel</div>
+      <div class="fs-sm text-muted">{{ user.username }}</div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="{% url 'admin_dashboard' %}" class="active"><span class="menu-icon">📊</span> Dashboard</a></li>
+      <li><a href="/admin/services/service/" target="_blank"><span class="menu-icon">🔧</span> Manage Services</a></li>
+      <li><a href="/admin/services/employee/" target="_blank"><span class="menu-icon">👷</span> Manage Employees</a></li>
+      <li><a href="/admin/services/booking/" target="_blank"><span class="menu-icon">📅</span> All Bookings</a></li>
+      <li><a href="/admin/services/payment/" target="_blank"><span class="menu-icon">💳</span> Payments</a></li>
+      <li><a href="/admin/" target="_blank"><span class="menu-icon">⚙️</span> Django Admin</a></li>
+      <li><a href="{% url 'logout' %}" style="color:#ff5370;"><span class="menu-icon">🚪</span> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="page-content">
+    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1.5rem;">🛠️ Admin Dashboard</h2>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-num text-primary">{{ total_users }}</div><div class="stat-lbl">Users</div></div>
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-num" style="color:#f6d365;">{{ total_bookings }}</div><div class="stat-lbl">Total Bookings</div></div>
+      <div class="stat-card">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-num text-danger">{{ unassigned_count }}</div>
+        <div class="stat-lbl">Need Assignment</div>
+      </div>
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num text-success">₹{{ total_revenue }}</div><div class="stat-lbl">Revenue <span class="badge badge-test" style="font-size:.6rem;">Test</span></div></div>
+    </div>
+
+    <!-- TEST MODE BANNER -->
+    <div class="test-mode-banner mb-3">
+      <div class="icon">🧪</div>
+      <div>
+        <h4>Razorpay Test Mode Active</h4>
+        <p>All payments shown are test transactions. No real money involved.</p>
+      </div>
+    </div>
+
+    <!-- ADMIN NOTIFICATIONS -->
+    {% if admin_notifications %}
+    <div class="card mb-3">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span><i class="fas fa-bell"></i> New Notifications</span>
+        <a href="{% url 'mark_notifications_read' %}" class="btn btn-sm btn-secondary" onclick="fetch('{% url 'mark_notifications_read' %}').then(()=>this.closest('.card').remove());return false;">Clear All</a>
+      </div>
+      {% for n in admin_notifications %}
+      <div class="alert alert-info" style="margin-top:.5rem;">
+        <i class="fas fa-bell"></i>
+        <div>
+          <strong>{{ n.title }}</strong>
+          <div class="fs-sm">{{ n.message }}</div>
+          <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem;">{{ n.created_at|timesince }} ago</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ══ BOOKINGS NEEDING EMPLOYEE ASSIGNMENT (Most Important) ══ -->
+    <div class="card mb-3">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:#ff5370;font-weight:800;">
+          <i class="fas fa-exclamation-circle"></i> Bookings Without Employee Assigned
+        </span>
+        <span class="badge badge-cancelled">{{ unassigned_count }} unassigned</span>
+      </div>
+
+      {% if unassigned_bookings %}
+      <div class="table-wrap" style="margin-top:.5rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Date</th>
+              <th>Slot</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for b in unassigned_bookings %}
+          <tr style="background:rgba(255,83,112,.04);">
+            <td style="font-weight:700;color:var(--primary);">#{{ b.id }}</td>
+            <td>
+              <strong>{{ b.user.get_full_name|default:b.user.username }}</strong><br>
+              <small class="text-muted">{{ b.user.email }}</small>
+            </td>
+            <td><strong>{{ b.service.name }}</strong></td>
+            <td>{{ b.booking_date }}</td>
+            <td><small class="badge badge-in_progress">{{ b.time_slot }}</small></td>
+            <td class="text-success fw-bold">₹{{ b.total_amount }}</td>
+            <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+            <td>
+              {% if b.payment %}
+                <span class="badge badge-{{ b.payment.status }}">{{ b.payment.get_status_display }}</span>
+              {% else %}
+                <span class="badge badge-cancelled">Unpaid</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'admin_assign_employee' b.id %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-user-plus"></i> Assign
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-success text-center" style="padding:1.5rem;">
+        ✅ All bookings have employees assigned!
+      </p>
+      {% endif %}
+    </div>
+
+    <!-- ══ ALL RECENT BOOKINGS ══ -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="fas fa-list"></i> All Recent Bookings</div>
+      <div class="table-wrap" style="margin-top:.5rem;">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Customer</th><th>Service</th><th>Date</th><th>Employee</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+          {% for b in recent_bookings %}
+          <tr>
+            <td style="font-weight:700;color:var(--primary);">#{{ b.id }}</td>
+            <td>{{ b.user.get_full_name|default:b.user.username }}</td>
+            <td>{{ b.service.name }}</td>
+            <td>{{ b.booking_date }}</td>
+            <td>
+              {% if b.employee %}
+                <span style="color:#43e97b;font-weight:600;">✅ {{ b.employee.user.get_full_name|default:b.employee.user.username }}</span>
+              {% else %}
+                <span style="color:#ff5370;font-weight:600;">❌ Not Assigned</span>
+              {% endif %}
+            </td>
+            <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+            <td>
+              <a href="{% url 'admin_assign_employee' b.id %}" class="btn btn-secondary btn-sm">
+                {% if b.employee %}Reassign{% else %}Assign{% endif %}
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ CIVIC COMPLAINTS ══ -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="fas fa-city"></i> Pending Civic Complaints</div>
+      {% if complaints %}
+      {% for c in complaints %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap;gap:.8rem;">
+        <div>
+          <strong class="fs-sm">{{ c.get_complaint_type_display }}</strong> — {{ c.user.username }}
+          <p class="text-muted fs-sm">{{ c.description|truncatewords:12 }} | {{ c.created_at|date:"d M Y" }}</p>
+        </div>
+        <form method="post" action="{% url 'admin_resolve_complaint' c.id %}" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          {% csrf_token %}
+          <input type="text" name="note" class="form-control" style="width:160px;padding:.4rem .7rem;font-size:.8rem;" placeholder="Admin note...">
+          <select name="status" class="form-control" style="width:120px;padding:.4rem;font-size:.8rem;">
+            <option value="in_review">In Review</option>
+            <option value="resolved">Resolved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <button type="submit" class="btn btn-success btn-sm">Update</button>
+        </form>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p class="text-muted text-center" style="padding:1.5rem;">No pending complaints.</p>
+      {% endif %}
+    </div>
+
+    <!-- ══ EMPLOYEES ══ -->
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span><i class="fas fa-users"></i> Employees</span>
+        <a href="/admin/services/employee/add/" target="_blank" class="btn btn-primary btn-sm">+ Add Employee</a>
+      </div>
+      <div class="table-wrap" style="margin-top:.5rem;">
+        <table>
+          <thead><tr><th>Name</th><th>Username</th><th>Phone</th><th>Rating</th><th>Jobs Done</th><th>Available</th></tr></thead>
+          <tbody>
+          {% for emp in employees %}
+          <tr>
+            <td><strong>{{ emp.user.get_full_name|default:emp.user.username }}</strong></td>
+            <td class="text-muted">{{ emp.user.username }}</td>
+            <td>{{ emp.phone }}</td>
+            <td><span style="color:#f6d365;">{{ emp.rating }}★</span></td>
+            <td>{{ emp.total_jobs }}</td>
+            <td>
+              {% if emp.is_available %}
+                <span class="badge badge-confirmed">Available</span>
+              {% else %}
+                <span class="badge badge-cancelled">Busy</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted" style="padding:1.5rem;">
+            No employees yet. <a href="/admin/services/employee/add/" target="_blank" class="text-primary">Add one from Django Admin →</a>
+          </td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--primary),var(--info));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto .8rem;">
+        {% if user.profile.profile_photo %}
+        <img src="{{ user.profile.profile_photo.url }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+        {% else %}👤{% endif %}
+      </div>
+      <div style="font-weight:700;font-size:.95rem;">{{ user.get_full_name|default:user.username }}</div>
+      <div style="font-size:.75rem;color:var(--text-muted);">{{ user.email }}</div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="{% url 'dashboard' %}" class="active"><span class="menu-icon">🏠</span> Dashboard</a></li>
+      <li><a href="{% url 'service_list' %}"><span class="menu-icon">🔧</span> Book Service</a></li>
+      <li><a href="{% url 'my_bookings' %}"><span class="menu-icon">📅</span> My Bookings</a></li>
+      <li><a href="{% url 'civic_complaint' %}"><span class="menu-icon">🏙️</span> Civic Complaint</a></li>
+      <li><a href="{% url 'my_complaints' %}"><span class="menu-icon">📋</span> My Complaints</a></li>
+      <li><a href="{% url 'profile' %}"><span class="menu-icon">👤</span> Profile</a></li>
+      <li><a href="{% url 'logout' %}" style="color:#ff5370;"><span class="menu-icon">🚪</span> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="page-content">
+    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1.5rem;">
+      Welcome back, {{ user.first_name|default:user.username }}! 👋
+    </h2>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-num text-primary">{{ total_bookings }}</div>
+        <div class="stat-lbl">Total Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-num text-success">{{ completed_bookings }}</div>
+        <div class="stat-lbl">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔔</div>
+        <div class="stat-num" style="color:#f6d365;">{{ notifications|length }}</div>
+        <div class="stat-lbl">Notifications</div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    {% if notifications %}
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-between align-center">
+        <span><i class="fas fa-bell"></i> Notifications</span>
+        <a href="{% url 'mark_notifications_read' %}" class="btn btn-sm btn-secondary" id="markReadBtn">Mark All Read</a>
+      </div>
+      {% for n in notifications %}
+      <div class="alert alert-info" style="margin-bottom:.5rem;">
+        <i class="fas fa-bell"></i>
+        <div><strong>{{ n.title }}</strong><br><span style="font-size:.8rem;">{{ n.message }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- QUICK BOOK SERVICES -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="fas fa-bolt"></i> Quick Book</div>
+      <div class="services-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+        {% for svc in services %}
+        <div class="service-card">
+          <div class="service-card-img" style="height:100px;">{{ svc.category.icon }}</div>
+          <div class="service-card-body">
+            <div class="service-card-title">{{ svc.name }}</div>
+            <div class="service-card-price">₹{{ svc.price }}</div>
+            <a href="{% url 'book_service' svc.id %}" class="btn btn-primary btn-sm btn-block">Book</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- RECENT BOOKINGS -->
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-between align-center">
+        <span><i class="fas fa-history"></i> Recent Bookings</span>
+        <a href="{% url 'my_bookings' %}" class="btn btn-sm btn-secondary">View All</a>
+      </div>
+      {% if bookings %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Service</th><th>Date</th><th>Slot</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+          {% for b in bookings %}
+          <tr>
+            <td><strong>{{ b.service.name }}</strong></td>
+            <td>{{ b.booking_date }}</td>
+            <td><small>{{ b.time_slot }}</small></td>
+            <td class="text-success fw-bold">₹{{ b.total_amount }}</td>
+            <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+            <td>
+              {% if b.status == 'pending' %}
+                <a href="{% url 'payment' b.id %}" class="btn btn-warning btn-sm">Pay</a>
+              {% elif b.status == 'completed' and not b.review %}
+                <a href="{% url 'rate_employee' b.id %}" class="btn btn-info btn-sm">Rate</a>
+              {% elif b.status == 'completed' %}
+                <a href="{% url 'invoice' b.id %}" class="btn btn-secondary btn-sm">Invoice</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted text-center" style="padding:2rem;">No bookings yet. <a href="{% url 'service_list' %}" class="text-primary">Book a service now!</a></p>
+      {% endif %}
+    </div>
+
+    <!-- RECENT COMPLAINTS -->
+    {% if complaints %}
+    <div class="card">
+      <div class="card-header d-flex justify-between align-center">
+        <span><i class="fas fa-city"></i> Recent Complaints</span>
+        <a href="{% url 'my_complaints' %}" class="btn btn-sm btn-secondary">View All</a>
+      </div>
+      {% for c in complaints %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.05);">
+        <div>
+          <div style="font-weight:600;font-size:.9rem;">{{ c.get_complaint_type_display }}</div>
+          <div style="font-size:.78rem;color:var(--text-muted);">{{ c.created_at|date:"d M Y" }}</div>
+        </div>
+        <span class="badge badge-{{ c.status }}">{{ c.get_status_display }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+document.getElementById('markReadBtn')?.addEventListener('click', function(e){
+  e.preventDefault();
+  fetch('{% url "mark_notifications_read" %}').then(()=>location.reload());
+});
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+2026-04-30T10:46:51.543669 - {'booking_id': 50, 'order_id': 'order_SjaMWgUc3zVK4Z', 'error': {'error': {'description': 'Please use another method'}}}
+2026-04-30T11:38:30.404144 - {'booking_id': 50, 'order_id': 'order_SjbDqtiIiixzTu', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'International cards are not supported. Please contact our support team for help', 'source': 'NA', 'step': 'NA', 'reason': 'NA', 'metadata': {'payment_id': 'pay_SjbFSc7xKG5eDW', 'order_id': 'order_SjbDqtiIiixzTu'}}}}
+2026-04-30T11:38:36.889258 - {'booking_id': 50, 'order_id': 'order_SjbDqtiIiixzTu', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'International cards are not supported. Please contact our support team for help', 'source': 'NA', 'step': 'NA', 'reason': 'NA', 'metadata': {'payment_id': 'pay_SjbFSc7xKG5eDW', 'order_id': 'order_SjbDqtiIiixzTu'}}}}
+2026-04-30T11:39:41.546014 - {'booking_id': 50, 'order_id': 'order_SjbDqtiIiixzTu', 'error': {'error': {'code': 'SERVER_ERROR', 'description': 'We are facing some trouble completing your request at the moment. Please try again shortly.', 'source': 'NA', 'step': 'NA', 'reason': 'NA', 'metadata': {}}}}
+2026-04-30T11:39:47.965639 - {'booking_id': 50, 'order_id': 'order_SjbDqtiIiixzTu', 'error': {'error': {'code': 'SERVER_ERROR', 'description': 'We are facing some trouble completing your request at the moment. Please try again shortly.', 'source': 'NA', 'step': 'NA', 'reason': 'NA', 'metadata': {}}}}
+2026-04-30T11:40:00.914482 - {'booking_id': 50, 'order_id': 'order_SjbDqtiIiixzTu', 'error': {'error': {'description': 'Authentication failed', 'code': 'BAD_REQUEST_ERROR'}}}
+2026-04-30T19:10:56.869018 - {'booking_id': 50, 'order_id': '', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'source': 'business', 'step': 'NA', 'reason': 'NA', 'metadata': {}}}}
+2026-04-30T19:11:03.342880 - {'booking_id': 50, 'order_id': '', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'source': 'business', 'step': 'NA', 'reason': 'NA', 'metadata': {}}}}
+2026-04-30T19:12:07.065824 - {'booking_id': 50, 'order_id': '', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'Authentication failed'}}}
+2026-04-30T19:12:55.338209 - {'booking_id': 50, 'order_id': '', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'Authentication failed'}}}
+2026-04-30T19:23:42.768903 - {'booking_id': 50, 'order_id': 'order_SjjA2lAlDdJKX5', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'Authentication failed'}}}
+2026-04-30T19:23:49.252610 - {'booking_id': 50, 'order_id': 'order_SjjA2lAlDdJKX5', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'Authentication failed'}}}
+2026-04-30T19:25:58.738132 - {'booking_id': 50, 'order_id': '', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'Authentication failed'}}}
+2026-04-30T19:26:05.211810 - {'booking_id': 50, 'order_id': '', 'error': {'error': {'code': 'BAD_REQUEST_ERROR', 'description': 'Authentication failed'}}}
+2026-05-02T14:25:27.929340 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards are not supported. Please contact our support team for help', 'booking_id': '56'}
+2026-05-02T14:25:34.422561 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards are not supported. Please contact our support team for help', 'booking_id': '56'}
+2026-05-02T14:28:36.381919 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '48'}
+2026-05-02T14:28:43.004999 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '48'}
+2026-05-02T14:28:58.510912 - {'error_desc': 'Please use another method', 'booking_id': '48'}
+2026-05-02T14:29:04.968748 - {'error_desc': 'Please use another method', 'booking_id': '48'}
+2026-05-02T14:32:24.586189 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '21'}
+2026-05-02T14:32:31.081891 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '21'}
+2026-05-02T14:36:23.885602 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '49'}
+2026-05-02T14:36:32.064858 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '49'}
+2026-05-02T14:39:01.912282 - {'error_desc': 'Please use another method', 'booking_id': '49'}
+2026-05-02T14:39:08.419629 - {'error_desc': 'Please use another method', 'booking_id': '49'}
+2026-05-02T14:41:08.478735 - {'error_desc': 'Please use another method', 'booking_id': '56'}
+2026-05-02T14:41:18.130971 - {'error_desc': 'Please use another method', 'booking_id': '56'}
+2026-05-02T14:41:47.042331 - {'error_desc': 'Please use another method', 'booking_id': '56'}
+2026-05-02T14:46:59.424186 - {'error_desc': 'Please use another method', 'booking_id': '56'}
+2026-05-02T14:47:05.920303 - {'error_desc': 'Please use another method', 'booking_id': '56'}
+2026-05-02T14:53:02.366686 - {'error_desc': 'Please use another method', 'booking_id': '58'}
+2026-05-02T14:53:08.875625 - {'error_desc': 'Please use another method', 'booking_id': '58'}
+2026-05-02T15:02:35.852084 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '56'}
+2026-05-02T15:02:42.355752 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '56'}
+2026-05-02T15:02:56.273509 - {'error_desc': 'Please use another method', 'booking_id': '56'}
+2026-05-02T15:03:35.325455 - {'error_desc': 'Please use another method', 'booking_id': '56'}
+2026-05-02T15:05:46.127330 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '56'}
+2026-05-02T15:05:52.625859 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '56'}
+2026-05-02T15:06:19.183600 - {'error_desc': 'Please use another method', 'booking_id': '51'}
+2026-05-02T15:06:25.681479 - {'error_desc': 'Please use another method', 'booking_id': '51'}
+2026-05-02T15:12:20.091812 - {'error_desc': 'Please use another method', 'booking_id': '51'}
+2026-05-02T15:17:25.677895 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '51'}
+2026-05-02T15:19:59.595810 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '51'}
+2026-05-02T15:27:46.528505 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '49'}
+2026-05-02T15:27:53.023456 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '49'}
+2026-05-02T15:28:40.040266 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '49'}
+2026-05-02T15:28:47.864150 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '49'}
+2026-05-02T15:39:15.464079 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '58'}
+2026-05-02T15:40:30.093489 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '58'}
+2026-05-02T15:40:45.871034 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '58'}
+2026-05-02T15:40:48.287110 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'Authentication failed', 'booking_id': '58'}
+2026-05-02T15:46:04.174444 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '58'}
+2026-05-02T15:46:10.649304 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '58'}
+2026-05-02T15:50:36.379802 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'The api key provided by you has expired and cannot be used. Please use correct key and secret.', 'booking_id': '58'}
+2026-05-04T12:29:22.295148 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '46'}
+2026-05-04T12:29:28.799148 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '46'}
+2026-05-04T12:35:17.196907 - {'error_desc': 'Please use another method', 'booking_id': '46'}
+2026-05-04T12:35:23.601347 - {'error_desc': 'Please use another method', 'booking_id': '46'}
+2026-05-04T12:35:38.731962 - {'error_desc': 'Please use another method', 'booking_id': '46'}
+2026-05-04T12:35:52.244845 - {'error_desc': 'Please use another method', 'booking_id': '46'}
+2026-05-04T12:53:25.516110 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '46'}
+2026-05-04T12:53:40.632879 - {'error_desc': 'Please use another method', 'booking_id': '46'}
+2026-05-04T12:54:25.411331 - {'error_desc': 'Please use another method', 'booking_id': '46'}
+2026-05-04T12:54:31.822130 - {'error_desc': 'Please use another method', 'booking_id': '46'}
+2026-05-04T12:55:59.447199 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-04T12:59:37.287085 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-04T13:00:38.635053 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-04T13:00:45.113651 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-04T13:01:33.212105 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-04T13:01:39.626670 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-05T13:27:33.311598 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-05T13:27:43.285605 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-14T17:27:00.685258 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-14T17:27:11.869990 - {'error_desc': 'Please use another method', 'booking_id': '59'}
+2026-05-29T18:34:51.686136 - {'error_code': 'BAD_REQUEST_ERROR', 'error_desc': 'International cards not supported. Please use an Indian card or contact support.', 'booking_id': '59'}

@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}Employee Dashboard{% endblock %}
+{% block content %}
+<div class="page-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:3rem;margin-bottom:.5rem;">👷</div>
+      <div style="font-weight:700;font-size:1rem;">{{ employee.user.get_full_name|default:employee.user.username }}</div>
+      <div class="fs-sm text-muted">Employee</div>
+      <div style="margin-top:.5rem;">
+        <span style="color:#f6d365;font-size:1rem;">★ {{ employee.rating }}</span>
+        <span class="text-muted fs-sm"> ({{ employee.total_jobs }} completed)</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="{% url 'employee_dashboard' %}" class="active"><span class="menu-icon">🏠</span> My Jobs</a></li>
+      <li><a href="{% url 'logout' %}" style="color:#ff5370;"><span class="menu-icon">🚪</span> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="page-content">
+    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1.5rem;">👷 My Assigned Jobs</h2>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-num text-primary">{{ total_jobs }}</div>
+        <div class="stat-lbl">Total Assigned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-num" style="color:#f6d365;">{{ pending_count }}</div>
+        <div class="stat-lbl">Pending / Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-num text-success">{{ done_count }}</div>
+        <div class="stat-lbl">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-num" style="color:#f6d365;">{{ employee.rating }}</div>
+        <div class="stat-lbl">My Rating</div>
+      </div>
+    </div>
+
+    <!-- ══ PENDING / ACTIVE JOBS ══ -->
+    <div class="card mb-3">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span><i class="fas fa-tasks"></i> Pending &amp; Active Jobs</span>
+        <span class="badge badge-pending">{{ pending_count }} jobs</span>
+      </div>
+
+      {% if pending_jobs %}
+        {% for b in pending_jobs %}
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:1.2rem;margin-top:1rem;">
+
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <div style="font-size:1.1rem;font-weight:800;color:var(--primary);">{{ b.service.name }}</div>
+              <div class="text-muted fs-sm" style="margin-top:.3rem;">
+                <i class="fas fa-user"></i> Customer: <strong>{{ b.user.get_full_name|default:b.user.username }}</strong>
+              </div>
+              <div class="text-muted fs-sm">
+                <i class="fas fa-calendar"></i> {{ b.booking_date }} &nbsp;|&nbsp;
+                <i class="fas fa-clock"></i> {{ b.time_slot }}
+              </div>
+              <div class="text-muted fs-sm">
+                <i class="fas fa-map-marker-alt"></i> {{ b.address }}
+              </div>
+              {% if b.problem_description %}
+              <div class="fs-sm" style="margin-top:.5rem;color:var(--text);">
+                <i class="fas fa-file-alt"></i> <strong>Problem:</strong> {{ b.problem_description }}
+              </div>
+              {% endif %}
+            </div>
+            <div style="text-align:right;">
+              <span class="badge badge-{{ b.status }}" style="font-size:.85rem;padding:.4rem .9rem;">
+                {% if b.status == 'confirmed' %}🟡 Confirmed — Start When Ready
+                {% elif b.status == 'in_progress' %}🔵 In Progress
+                {% endif %}
+              </span>
+              <div class="text-success fw-bold" style="margin-top:.5rem;font-size:1rem;">₹{{ b.total_amount }}</div>
+            </div>
+          </div>
+
+          <!-- Before photo -->
+          {% if b.problem_photo %}
+          <div style="margin-bottom:1rem;">
+            <div class="fs-sm text-muted mb-1"><i class="fas fa-camera"></i> Customer's Problem Photo:</div>
+            <a href="{{ b.problem_photo.url }}" target="_blank">
+              <img src="{{ b.problem_photo.url }}" style="max-height:140px;border-radius:8px;border:1px solid rgba(255,255,255,.1);object-fit:cover;">
+            </a>
+          </div>
+          {% endif %}
+
+          <!-- Action buttons -->
+          <form method="post" action="{% url 'update_job_status' b.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if b.status == 'confirmed' %}
+              <input type="hidden" name="status" value="in_progress">
+              <button type="submit" class="btn btn-warning" onclick="return confirm('Start this job now?')">
+                <i class="fas fa-play"></i> Start Job
+              </button>
+
+            {% elif b.status == 'in_progress' %}
+              <div style="background:rgba(67,233,123,.05);border:1px solid rgba(67,233,123,.2);border-radius:10px;padding:1rem;">
+                <div class="form-group">
+                  <label class="form-label"><i class="fas fa-camera"></i> Upload Completion Photo <span style="color:#ff5370;">*required</span></label>
+                  <input type="file" name="completion_photo" class="form-control" accept="image/*" required>
+                  <div class="fs-sm text-muted" style="margin-top:.4rem;">Take a photo of the completed work before submitting.</div>
+                </div>
+                <input type="hidden" name="status" value="completed">
+                <button type="submit" class="btn btn-success btn-lg btn-block" onclick="return confirm('Mark this job as COMPLETED? Make sure you have uploaded the photo.')">
+                  <i class="fas fa-check-circle"></i> Mark as Completed
+                </button>
+              </div>
+            {% endif %}
+          </form>
+
+        </div>
+        {% endfor %}
+
+      {% else %}
+        <div class="text-center" style="padding:3rem;">
+          <div style="font-size:3rem;margin-bottom:1rem;">🎉</div>
+          <h3>No pending jobs right now</h3>
+          <p class="text-muted">Admin will assign new jobs to you. Check back soon!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ══ COMPLETED JOBS ══ -->
+    <div class="card">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span><i class="fas fa-check-double"></i> Completed Jobs</span>
+        <span class="badge badge-confirmed">{{ done_count }} done</span>
+      </div>
+
+      {% if completed_jobs %}
+      <div class="table-wrap" style="margin-top:.5rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Service</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Slot</th>
+              <th>Amount</th>
+              <th>Rating</th>
+              <th>Photo</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for b in completed_jobs %}
+          <tr>
+            <td style="font-weight:700;color:var(--primary);">#{{ b.id }}</td>
+            <td><strong>{{ b.service.name }}</strong></td>
+            <td>{{ b.user.get_full_name|default:b.user.username }}</td>
+            <td>{{ b.booking_date }}</td>
+            <td><small>{{ b.time_slot }}</small></td>
+            <td class="text-success fw-bold">₹{{ b.total_amount }}</td>
+            <td>
+              {% if b.review %}
+                <span style="color:#f6d365;font-size:1rem;">
+                  {% for i in "12345" %}{% if forloop.counter <= b.review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                </span>
+                <div class="fs-sm text-muted">{{ b.review.comment|truncatewords:6 }}</div>
+              {% else %}
+                <span class="text-muted fs-sm">Not rated yet</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if b.completion_photo %}
+              <a href="{{ b.completion_photo.url }}" target="_blank" class="btn btn-sm btn-secondary">
+                <i class="fas fa-image"></i> View
+              </a>
+              {% else %}
+                <span class="text-muted fs-sm">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-muted text-center" style="padding:2rem;">No completed jobs yet.</p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

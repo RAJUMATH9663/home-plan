@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Verify Work{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:760px;">
+
+  <h3 class="mb-4"><i class="fas fa-camera"></i> Verify Completed Work</h3>
+
+  <!-- Booking info -->
+  <div class="glass-card p-4 mb-4" style="border-radius:14px;border-left:4px solid #a78bfa;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;font-size:.9rem;">
+      <div><span style="color:var(--text-muted);">Service:</span> <strong>{{ booking.service.name }}</strong></div>
+      <div><span style="color:var(--text-muted);">Booking:</span> <strong>#{{ booking.id }}</strong></div>
+      <div><span style="color:var(--text-muted);">Date:</span> <strong>{{ booking.booking_date }}</strong></div>
+      <div><span style="color:var(--text-muted);">Employee:</span>
+        <strong style="color:#43e97b;">
+          {{ booking.employee.user.get_full_name|default:booking.employee.user.username }}
+        </strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEFORE vs AFTER photos side by side -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+
+    <div class="glass-card p-3" style="border-radius:12px;">
+      <div style="color:#f6d365;font-size:.8rem;font-weight:600;margin-bottom:.6rem;">
+        📷 BEFORE — Your Problem Photo
+      </div>
+      {% if booking.problem_photo %}
+        <img src="{{ booking.problem_photo.url }}"
+             style="width:100%;height:180px;object-fit:cover;border-radius:8px;" alt="Before">
+      {% else %}
+        <div style="height:180px;background:rgba(255,255,255,.04);border-radius:8px;
+                    display:flex;align-items:center;justify-content:center;
+                    color:var(--text-muted);font-size:.85rem;">
+          No before photo
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="glass-card p-3" style="border-radius:12px;">
+      <div style="color:#43e97b;font-size:.8rem;font-weight:600;margin-bottom:.6rem;">
+        ✅ AFTER — Employee Completion Photo
+      </div>
+      {% if booking.completion_photo %}
+        <img src="{{ booking.completion_photo.url }}"
+             style="width:100%;height:180px;object-fit:cover;border-radius:8px;border:2px solid #43e97b44;"
+             alt="After">
+      {% else %}
+        <div style="height:180px;background:rgba(255,255,255,.04);border-radius:8px;
+                    display:flex;align-items:center;justify-content:center;
+                    color:var(--text-muted);font-size:.85rem;">
+          No completion photo
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Upload verification form -->
+  <div class="glass-card p-4" style="border-radius:14px;">
+
+    <h5 style="margin-bottom:.4rem;">
+      🔍 Upload Your Verification Photo
+    </h5>
+    <p style="color:var(--text-muted);font-size:.87rem;margin-bottom:1.2rem;">
+      Take a photo of the completed work from your side to confirm it is done properly.
+      This builds trust and verifies the employee's work.
+      After verification you can rate the employee.
+    </p>
+
+    {% if messages %}
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}" style="margin-bottom:1rem;">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="form-group mb-4">
+        <label class="form-label">
+          <i class="fas fa-upload"></i> Your Photo of Completed Work
+          <span style="color:#ff5370;"> *required</span>
+        </label>
+        <input type="file" name="user_verification_photo"
+               class="form-control" accept="image/*" required>
+        <div style="color:var(--text-muted);font-size:.77rem;margin-top:.4rem;">
+          Example: clean room, fixed pipe, painted wall — clearly showing the work is done
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <i class="fas fa-check-circle"></i> Verify &amp; Proceed to Rating
+        </button>
+        <a href="{% url 'my_bookings' %}" class="btn btn-secondary btn-lg">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Rate Employee{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:700px;">
+
+  <h3 class="mb-4"><i class="fas fa-star"></i> Rate the Service</h3>
+
+  <!-- Booking summary -->
+  <div class="glass-card p-4 mb-4" style="border-radius:14px;border-left:4px solid #f6d365;">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(99,102,241,.15);
+                  display:flex;align-items:center;justify-content:center;font-size:1.5rem;">👷</div>
+      <div>
+        <div style="font-weight:600;font-size:1rem;color:#43e97b;">
+          {{ booking.employee.user.get_full_name|default:booking.employee.user.username }}
+        </div>
+        <div style="color:var(--text-muted);font-size:.83rem;">
+          {{ booking.service.name }} | {{ booking.booking_date }} | {{ booking.time_slot }}
+        </div>
+        <div style="color:var(--text-muted);font-size:.78rem;">
+          ★ {{ booking.employee.rating }} avg | {{ booking.employee.total_jobs }} jobs done
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 photos for final comparison -->
+  {% if booking.problem_photo or booking.completion_photo or booking.user_verification_photo %}
+  <div class="glass-card p-4 mb-4" style="border-radius:14px;">
+    <div style="color:var(--text-muted);font-size:.8rem;font-weight:600;margin-bottom:.8rem;">
+      Work Evidence Photos
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;">
+      {% if booking.problem_photo %}
+      <div>
+        <div style="font-size:.72rem;color:#f6d365;margin-bottom:.3rem;">Before</div>
+        <img src="{{ booking.problem_photo.url }}"
+             style="width:100%;height:120px;object-fit:cover;border-radius:8px;" alt="Before">
+      </div>
+      {% endif %}
+      {% if booking.completion_photo %}
+      <div>
+        <div style="font-size:.72rem;color:#43e97b;margin-bottom:.3rem;">After (Employee)</div>
+        <img src="{{ booking.completion_photo.url }}"
+             style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:2px solid #43e97b33;" alt="After">
+      </div>
+      {% endif %}
+      {% if booking.user_verification_photo %}
+      <div>
+        <div style="font-size:.72rem;color:#a78bfa;margin-bottom:.3rem;">Verified (You)</div>
+        <img src="{{ booking.user_verification_photo.url }}"
+             style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:2px solid #a78bfa33;" alt="Verified">
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Rating form -->
+  <div class="glass-card p-4" style="border-radius:14px;">
+    <h5 class="mb-3">Your Rating</h5>
+
+    {% if messages %}
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- Star rating -->
+      <div class="form-group mb-4">
+        <label class="form-label">Rating <span style="color:#ff5370;">*</span></label>
+        <div id="starRow" style="display:flex;gap:.5rem;margin-top:.4rem;">
+          {% for i in "12345" %}
+          <label style="cursor:pointer;">
+            <input type="radio" name="rating" value="{{ forloop.counter }}"
+                   style="display:none;"
+                   onchange="setStars({{ forloop.counter }})">
+            <span id="star{{ forloop.counter }}"
+                  style="font-size:2.2rem;color:#555;transition:color .15s;">★</span>
+          </label>
+          {% endfor %}
+        </div>
+        <div id="starLabel" style="color:var(--text-muted);font-size:.82rem;margin-top:.3rem;"></div>
+      </div>
+
+      <!-- Comment -->
+      <div class="form-group mb-4">
+        <label class="form-label">Your Review <small style="color:var(--text-muted);">(optional)</small></label>
+        <textarea name="comment" class="form-control" rows="4"
+                  placeholder="Share your experience — what was good, what could be better..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-block">
+        <i class="fas fa-paper-plane"></i> Submit Rating
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<script>
+const labels = ['','Poor','Fair','Good','Very Good','Excellent'];
+const colors = ['','#ff5370','#ff8800','#f6d365','#43e97b','#43e97b'];
+function setStars(n) {
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('star' + i).style.color = i <= n ? colors[n] : '#555';
+  }
+  document.getElementById('starLabel').textContent = labels[n];
+  document.getElementById('starLabel').style.color = colors[n];
+}
+</script>
+{% endblock %}

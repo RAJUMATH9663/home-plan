@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+{% block content %}
+<div class="container section">
+
+  <div class="invoice-box" id="invoicePrint">
+    <!-- Invoice Header -->
+    <div class="invoice-header">
+      <div class="invoice-title">
+        <div style="font-size:2rem;font-weight:800;background:linear-gradient(90deg,var(--primary),var(--info));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+          🏠 HomeServices
+        </div>
+        <p class="text-muted fs-sm">An Integrated Platform for All Daily Home Services</p>
+        <div style="margin-top:.8rem;">
+          <span class="badge badge-paid"><i class="fas fa-check-circle"></i> PAID</span>
+          <span class="badge badge-test" style="margin-left:.5rem;">🧪 TEST MODE</span>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:1.3rem;font-weight:800;color:var(--primary);">{{ invoice.invoice_number }}</div>
+        <div class="text-muted fs-sm">Date: {{ invoice.generated_at|date:"d M Y" }}</div>
+        <div class="text-muted fs-sm">Booking: #{{ booking.id }}</div>
+      </div>
+    </div>
+
+    <!-- Billing Info -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+      <div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem;font-weight:600;">BILLED TO</div>
+        <div style="font-weight:700;">{{ booking.user.get_full_name }}</div>
+        <div class="text-muted fs-sm">{{ booking.user.email }}</div>
+        <div class="text-muted fs-sm">{{ booking.address|truncatewords:10 }}</div>
+      </div>
+      <div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem;font-weight:600;">SERVICE BY</div>
+        <div style="font-weight:700;">
+          {% if booking.employee %}{{ booking.employee.user.get_full_name }}{% else %}HomeServices Professional{% endif %}
+        </div>
+        <div class="text-muted fs-sm">{{ booking.booking_date }} | {{ booking.time_slot }}</div>
+      </div>
+    </div>
+
+    <!-- Service Details -->
+    <div style="background:rgba(255,255,255,.05);border-radius:10px;overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:rgba(108,99,255,.15);">
+            <th style="padding:.8rem 1rem;text-align:left;font-size:.82rem;color:var(--text-muted);">Service</th>
+            <th style="padding:.8rem 1rem;text-align:center;font-size:.82rem;color:var(--text-muted);">Duration</th>
+            <th style="padding:.8rem 1rem;text-align:right;font-size:.82rem;color:var(--text-muted);">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:.9rem 1rem;font-weight:600;">{{ booking.service.name }}</td>
+            <td style="padding:.9rem 1rem;text-align:center;color:var(--text-muted);">{{ booking.service.duration_hours }}h</td>
+            <td style="padding:.9rem 1rem;text-align:right;font-weight:700;color:#43e97b;">₹{{ invoice.total_amount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals -->
+    <div style="margin-top:1rem;">
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0;font-size:.9rem;">
+        <span class="text-muted">Subtotal</span><span>₹{{ invoice.total_amount }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0;font-size:.9rem;border-bottom:1px solid var(--border);">
+        <span class="text-muted">GST (18%)</span><span>₹{{ invoice.gst_amount }}</span>
+      </div>
+      <div class="invoice-total">
+        <span>Total Paid</span>
+        <span style="color:#43e97b;">₹{{ invoice.final_amount }}</span>
+      </div>
+    </div>
+
+    <!-- Payment Info -->
+    {% if booking.payment %}
+    <div style="background:rgba(67,233,123,.05);border:1px solid rgba(67,233,123,.2);border-radius:10px;padding:1rem;margin-top:1.2rem;">
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.5rem;font-weight:600;">PAYMENT DETAILS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.82rem;">
+        <div><span class="text-muted">Payment ID: </span><code style="color:#43e97b;">{{ booking.payment.razorpay_payment_id|default:"N/A" }}</code></div>
+        <div><span class="text-muted">Order ID: </span><code style="color:var(--info);">{{ booking.payment.razorpay_order_id }}</code></div>
+        <div><span class="text-muted">Status: </span><span class="badge badge-paid">Paid</span></div>
+        <div><span class="text-muted">Mode: </span><span class="badge badge-test">Test Mode</span></div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div style="text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text-muted);">
+      Thank you for using HomeServices! &nbsp;|&nbsp; support@homeservices.com &nbsp;|&nbsp; Generated on {{ invoice.generated_at|date:"d M Y, h:i A" }}
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div style="text-align:center;margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <button onclick="window.print()" class="btn btn-primary btn-lg">
+      <i class="fas fa-download"></i> Download / Print Invoice
+    </button>
+    <a href="{% url 'my_bookings' %}" class="btn btn-secondary btn-lg">
+      <i class="fas fa-list"></i> My Bookings
+    </a>
+    {% if not booking.review and booking.status == 'completed' %}
+    <a href="{% url 'rate_employee' booking.id %}" class="btn btn-warning btn-lg">
+      <i class="fas fa-star"></i> Rate Service
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+@media print {
+  nav, footer, .btn, .float-shape { display:none !important; }
+  body { background:#fff !important; color:#000 !important; }
+  .invoice-box { border:1px solid #ddd !important; background:#fff !important; }
+  * { -webkit-text-fill-color: unset !important; color: inherit !important; }
+}
+</style>
+{% endblock %}

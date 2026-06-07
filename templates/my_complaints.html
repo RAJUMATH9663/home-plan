@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}My Complaints{% endblock %}
+{% block content %}
+<div class="page-layout">
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="{% url 'dashboard' %}"><span class="menu-icon">🏠</span> Dashboard</a></li>
+      <li><a href="{% url 'service_list' %}"><span class="menu-icon">🔧</span> Book Service</a></li>
+      <li><a href="{% url 'my_bookings' %}"><span class="menu-icon">📅</span> My Bookings</a></li>
+      <li><a href="{% url 'civic_complaint' %}"><span class="menu-icon">🏙️</span> New Complaint</a></li>
+      <li><a href="{% url 'my_complaints' %}" class="active"><span class="menu-icon">📋</span> My Complaints</a></li>
+      <li><a href="{% url 'profile' %}"><span class="menu-icon">👤</span> Profile</a></li>
+      <li><a href="{% url 'logout' %}" style="color:#ff5370;"><span class="menu-icon">🚪</span> Logout</a></li>
+    </ul>
+  </aside>
+  <div class="page-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="font-size:1.5rem;font-weight:800;"><i class="fas fa-city"></i> My Complaints</h2>
+      <a href="{% url 'civic_complaint' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Complaint</a>
+    </div>
+
+    {% if complaints %}
+    <div style="display:grid;gap:1rem;">
+      {% for c in complaints %}
+      <div class="card" style="padding:1.2rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem;">
+              <span style="font-size:1.5rem;">
+                {% if c.complaint_type == 'gas' %}⛽
+                {% elif c.complaint_type == 'water' %}💧
+                {% elif c.complaint_type == 'garbage' %}🗑️
+                {% elif c.complaint_type == 'streetlight' %}💡
+                {% elif c.complaint_type == 'electricity' %}⚡
+                {% else %}📋{% endif %}
+              </span>
+              <div>
+                <div style="font-weight:700;font-size:.95rem;">{{ c.get_complaint_type_display }}</div>
+                <div class="text-muted fs-sm">Submitted: {{ c.created_at|date:"d M Y, h:i A" }}</div>
+              </div>
+            </div>
+            <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:.5rem;">{{ c.description|truncatewords:20 }}</p>
+            <p class="fs-sm text-muted"><i class="fas fa-map-marker-alt"></i> {{ c.address|truncatewords:10 }}</p>
+            {% if c.admin_note %}
+            <div class="alert alert-info" style="font-size:.82rem;margin-top:.5rem;padding:.6rem .9rem;">
+              <i class="fas fa-comment-alt"></i> <strong>Admin Note:</strong> {{ c.admin_note }}
+            </div>
+            {% endif %}
+          </div>
+          <div style="text-align:right;">
+            <span class="badge badge-{{ c.status }}">{{ c.get_status_display }}</span>
+            {% if c.photo %}
+            <br><a href="{{ c.photo.url }}" target="_blank" class="btn btn-sm btn-secondary mt-2">📷 View Photo</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card text-center" style="padding:4rem;">
+      <div style="font-size:4rem;margin-bottom:1rem;">🏙️</div>
+      <h3>No complaints submitted</h3>
+      <p class="text-muted mb-3">Report a civic issue in your area.</p>
+      <a href="{% url 'civic_complaint' %}" class="btn btn-primary">Submit Complaint</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
