@@ -170,6 +170,16 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 SESSION_COOKIE_AGE = 86400
 
+# ─── Session Backend ──────────────────────────────────────────────────────────
+# On Vercel (serverless), each request may hit a different container, so
+# DB-backed sessions stored in ephemeral SQLite would be lost. Use signed
+# cookies instead — session data is stored in the browser cookie itself,
+# which works perfectly across all Vercel containers.
+if is_vercel_runtime():
+    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
 # ─── Logging (shows email errors in terminal) ────────────────────────────────
 LOGGING = {
     'version': 1,
