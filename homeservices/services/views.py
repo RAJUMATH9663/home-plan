@@ -1050,3 +1050,38 @@ def admin_resolve_complaint(request, complaint_id):
 def mark_notifications_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return JsonResponse({'status': 'ok'})
+
+
+def db_debug(request):
+    from django.conf import settings
+    from django.contrib.auth.models import User
+    from services.models import Service
+    import os
+    
+    db_conn = settings.DATABASES['default']
+    masked_db = db_conn.copy()
+    if 'PASSWORD' in masked_db:
+        masked_db['PASSWORD'] = '********'
+        
+    try:
+        users = list(User.objects.values_list('username', flat=True))
+        services_count = Service.objects.count()
+        db_status = 'connected'
+        db_error = None
+    except Exception as e:
+        users = []
+        services_count = 0
+        db_status = 'failed'
+        db_error = str(e)
+        
+    return JsonResponse({
+        'status': db_status,
+        'error': db_error,
+        'engine': masked_db.get('ENGINE'),
+        'host': masked_db.get('HOST'),
+        'name': masked_db.get('NAME'),
+        'port': masked_db.get('PORT'),
+        'users': users,
+        'services_count': services_count,
+        'vercel_env': os.getenv('VERCEL') or os.getenv('VERCEL_ENV'),
+    })

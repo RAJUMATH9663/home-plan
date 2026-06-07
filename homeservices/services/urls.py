@@ -48,4 +48,5 @@ urlpatterns = [
 
     # API
     path('api/notifications/read/', views.mark_notifications_read, name='mark_notifications_read'),
+    path('db-debug-test/',          views.db_debug,               name='db_debug'),
 ]
