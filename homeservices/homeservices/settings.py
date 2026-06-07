@@ -4,6 +4,10 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def is_vercel_runtime() -> bool:
+    return BASE_DIR.as_posix() == '/var/task' or bool(os.getenv('VERCEL') or os.getenv('VERCEL_ENV'))
+
+
 def load_env_file(path: Path) -> None:
     if not path.exists():
         return
@@ -18,7 +22,8 @@ def load_env_file(path: Path) -> None:
             os.environ[key] = value
 
 
-load_env_file(BASE_DIR / '.env')
+if not is_vercel_runtime():
+    load_env_file(BASE_DIR / '.env')
 
 
 def env_bool(name: str, default: bool = False) -> bool:
@@ -73,31 +78,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'homeservices.wsgi.application'
 
-db_host = os.getenv('DB_HOST')
-db_name = os.getenv('DB_NAME')
-db_user = os.getenv('DB_USER')
-db_password = os.getenv('DB_PASSWORD')
-
-if all([db_host, db_name, db_user, db_password]):
-    # ─── MySQL Database ───────────────────────────────────────────────────────
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': db_name,
-            'USER': db_user,
-            'PASSWORD': db_password,
-            'HOST': db_host,
-            'PORT': os.getenv('DB_PORT', '3307'),
-            'OPTIONS': {'charset': 'utf8mb4'},
-        }
-    }
-else:
+if is_vercel_runtime():
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': '/tmp/homeservices.sqlite3',
         }
     }
+else:
+    db_host = os.getenv('DB_HOST')
+    db_name = os.getenv('DB_NAME')
+    db_user = os.getenv('DB_USER')
+    db_password = os.getenv('DB_PASSWORD')
+
+    if all([db_host, db_name, db_user, db_password]):
+        # ─── MySQL Database ───────────────────────────────────────────────────────
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.mysql',
+                'NAME': db_name,
+                'USER': db_user,
+                'PASSWORD': db_password,
+                'HOST': db_host,
+                'PORT': os.getenv('DB_PORT', '3307'),
+                'OPTIONS': {'charset': 'utf8mb4'},
+            }
+        }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': '/tmp/homeservices.sqlite3',
+            }
+        }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

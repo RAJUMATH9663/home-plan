@@ -4,6 +4,10 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def is_vercel_runtime() -> bool:
+    return BASE_DIR.as_posix() == '/var/task' or bool(os.getenv('VERCEL') or os.getenv('VERCEL_ENV'))
+
+
 def load_env_file(path: Path) -> None:
     if not path.exists():
         return
@@ -18,7 +22,8 @@ def load_env_file(path: Path) -> None:
             os.environ[key] = value
 
 
-load_env_file(BASE_DIR / '.env')
+if not is_vercel_runtime():
+    load_env_file(BASE_DIR / '.env')
 
 
 def env_bool(name: str, default: bool = False) -> bool:
@@ -29,7 +34,9 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-homeservices-dev-only')
 DEBUG = env_bool('DJANGO_DEBUG', True)
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',') if host.strip()]
+if is_vercel_runtime():
+    ALLOWED_HOSTS.extend(['.vercel.app', 'localhost', '127.0.0.1'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -71,18 +78,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'homeservices.wsgi.application'
 
-# ─── MySQL Database ───────────────────────────────────────────────────────────
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'homeservices_db'),
-        'USER': os.getenv('DB_USER', 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'mysql123'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '3307'),
-        'OPTIONS': {'charset': 'utf8mb4'},
+if is_vercel_runtime():
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '/tmp/homeservices.sqlite3',
+        }
     }
-}
+else:
+    # ─── MySQL Database ───────────────────────────────────────────────────────────
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('DB_NAME', 'homeservices_db'),
+            'USER': os.getenv('DB_USER', 'root'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'mysql123'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '3307'),
+            'OPTIONS': {'charset': 'utf8mb4'},
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
