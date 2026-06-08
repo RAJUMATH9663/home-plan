@@ -51,9 +51,21 @@ def is_employee(user):
 #  HOME
 # ════════════════════════════════════════════════════════
 def home(request):
-    services   = Service.objects.filter(is_active=True)[:8]
+    services   = Service.objects.filter(is_active=True)[:6]
     categories = ServiceCategory.objects.all()
-    return render(request, 'home.html', {'services': services, 'categories': categories})
+    civic_types = [
+        ('gas',         'Gas Booking',           '⛽'),
+        ('water',       'Water Tanker',           '💧'),
+        ('garbage',     'Garbage Complaint',      '🗑️'),
+        ('streetlight', 'Streetlight Complaint',  '💡'),
+        ('electricity', 'Electricity Issue',      '⚡'),
+        ('other',       'Other',                  '📋'),
+    ]
+    return render(request, 'home.html', {
+        'services':    services,
+        'categories':  categories,
+        'civic_types': civic_types,
+    })
 
 
 # ════════════════════════════════════════════════════════

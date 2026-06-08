@@ -49,8 +49,8 @@ class Command(BaseCommand):
                     defaults={'description': desc, 'price': price, 'duration_hours': hours}
                 )
                 if created:
-                    self.stdout.write(f'    ✅ Created service: {svc_name} (₹{price})')
+                    self.stdout.write(f'    [OK] Created service: {svc_name} (Rs.{price})')
             except ServiceCategory.DoesNotExist:
-                self.stdout.write(self.style.WARNING(f'  ⚠️ Category not found: {cat_name}'))
+                self.stdout.write(self.style.WARNING(f'  [!] Category not found: {cat_name}'))
 
-        self.stdout.write(self.style.SUCCESS('\n🎉 Seed data complete! You can now log in and start using the platform.'))
+        self.stdout.write(self.style.SUCCESS('\nSeed data complete! You can now log in and start using the platform.'))
