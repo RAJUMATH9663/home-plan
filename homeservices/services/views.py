@@ -186,6 +186,8 @@ def verify_otp(request):
                 del request.session['reg_data']
                 request.session.pop('otp_preview', None)
                 login(request, user)
+                # Keep logged in for 30 days
+                request.session.set_expiry(60 * 60 * 24 * 30)
                 messages.success(request, f"Welcome {user.first_name}! Account created.")
                 return redirect('dashboard')
             else:
@@ -232,6 +234,8 @@ def user_login(request):
             user = authenticate(request, username=uname, password=pwd)
             if user:
                 login(request, user)
+                # Keep logged in for 30 days — session won't expire at browser close
+                request.session.set_expiry(60 * 60 * 24 * 30)
                 if is_admin(user):    return redirect('admin_dashboard')
                 if is_employee(user): return redirect('employee_dashboard')
                 return redirect('dashboard')

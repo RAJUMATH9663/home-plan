@@ -168,17 +168,24 @@ RAZORPAY_TEST_MODE = env_bool('RAZORPAY_TEST_MODE', True)
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
-SESSION_COOKIE_AGE = 86400
 
-# ─── Session Backend ──────────────────────────────────────────────────────────
+# ─── Session / Login Persistence ─────────────────────────────────────────────
+# Users stay logged in for 30 days. Only the Logout button ends the session.
+SESSION_COOKIE_AGE           = 60 * 60 * 24 * 30   # 30 days in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False              # survive browser restarts
+SESSION_SAVE_EVERY_REQUEST   = True                  # refresh expiry on every request
+SESSION_COOKIE_HTTPONLY      = True                  # JS cannot read the cookie
+SESSION_COOKIE_SAMESITE      = 'Lax'                # CSRF protection
+
 # On Vercel (serverless), each request may hit a different container, so
 # DB-backed sessions stored in ephemeral SQLite would be lost. Use signed
 # cookies instead — session data is stored in the browser cookie itself,
 # which works perfectly across all Vercel containers.
 if is_vercel_runtime():
     SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+else:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # local: DB-backed
+
 
 # ─── Logging (shows email errors in terminal) ────────────────────────────────
 LOGGING = {
